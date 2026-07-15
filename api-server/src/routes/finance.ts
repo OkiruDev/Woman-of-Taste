@@ -1,26 +1,13 @@
 import { Router } from "express";
 import { eq, desc, sql } from "drizzle-orm";
-import jwt from "jsonwebtoken";
 import { randomBytes } from "crypto";
 import fs from "fs";
 import path from "path";
 import { db } from "@workspace/db";
 import { bookingsTable, expensesTable } from "@workspace/db/schema";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const financeRouter = Router();
-
-function getJwtSecret(): string {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : (req.query?.token as string | undefined);
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch {
-    return res.status(401).json({ ok: false, error: "Unauthorized." });
-  }
-}
 
 function saveReceiptImage(base64: string): string | null {
   try {

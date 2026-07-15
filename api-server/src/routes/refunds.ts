@@ -1,29 +1,13 @@
 import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
-import jwt from "jsonwebtoken";
 import { randomBytes } from "crypto";
 import { db } from "@workspace/db";
 import { bookingsTable, refundRequestsTable } from "@workspace/db/schema";
 import { createTransporter } from "../utils/mailer.js";
 import { buildRefundRequestEmail, buildRefundSubmittedAdminEmail } from "../utils/invoiceEmail.js";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const refundsRouter = Router();
-
-function getJwtSecret(): string {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : (req.query?.token as string | undefined);
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try {
-    jwt.verify(token, getJwtSecret());
-    next();
-  } catch {
-    return res.status(401).json({ ok: false, error: "Unauthorized." });
-  }
-}
 
 // POST /api/admin/bookings/:id/refund-request — create & email refund link to guest
 refundsRouter.post("/admin/bookings/:id/refund-request", authMiddleware, async (req, res) => {
@@ -131,7 +115,7 @@ refundsRouter.post("/refund/:token", async (req, res) => {
   try {
     const transporter = createTransporter();
     if (!transporter) throw new Error("Email not configured.");
-    const appUrl = process.env["APP_URL"] ?? "https://womanoftaste.co.za";
+    const adminAppUrl = process.env["ADMIN_APP_URL"] ?? "https://admin.womanoftaste.co.za";
     const { subject, html } = buildRefundSubmittedAdminEmail({
       firstName: refund.firstName,
       surname: refund.surname,
@@ -144,7 +128,7 @@ refundsRouter.post("/refund/:token", async (req, res) => {
       accountNumber: accountNumber.trim(),
       branchCode: branchCode.trim(),
       accountType: accountType.trim(),
-      adminUrl: `${appUrl}/admin/refunds`,
+      adminUrl: `${adminAppUrl}/admin/refunds`,
     });
     await transporter.sendMail({
       from: `"Woman of Taste" <${process.env["SMTP_USER"] ?? "info@womanoftaste.co.za"}>`,

@@ -2,20 +2,9 @@ import { Router } from "express";
 import { eq, desc, ilike, or, and, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { contactsTable, bookingsTable, activityLogTable } from "@workspace/db/schema";
-import jwt from "jsonwebtoken";
+import { requireAdminAuth as authMiddleware, requireAdminAuthAllowQueryToken } from "../middlewares/adminAuth.js";
 
 const contactsRouter = Router();
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : req.query?.token;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 async function logActivity(actionType: string, description: string, entityType = "", entityId = "") {
   try {
@@ -73,7 +62,7 @@ contactsRouter.get("/admin/contacts", authMiddleware, async (req, res) => {
 });
 
 // GET /api/admin/contacts/export — CSV export
-contactsRouter.get("/admin/contacts/export", authMiddleware, async (_req, res) => {
+contactsRouter.get("/admin/contacts/export", requireAdminAuthAllowQueryToken, async (_req, res) => {
   const contacts = await db.select().from(contactsTable).orderBy(desc(contactsTable.createdAt));
   const header = "ID,First Name,Last Name,Email,Phone,Company,Source,Tags,Opted Out,Emails Received,Last Email Sent,Date Added\n";
   const rows = contacts.map(c =>

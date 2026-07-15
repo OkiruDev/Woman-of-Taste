@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Lock, Search } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { FaTiktok, FaInstagram, FaPinterest } from "react-icons/fa";
-import { isTokenValid, getAdminToken } from "@/pages/admin/AdminLogin";
 import { socialLinks } from "@/data/social";
 import SiteSearch from "@/components/SiteSearch";
 
@@ -160,16 +159,6 @@ export default function Navbar() {
                 <span>Search</span>
                 <kbd className="font-sans text-[8px] bg-[hsl(40,20%,90%)] border border-[hsl(35,15%,80%)] rounded px-1 py-0.5 leading-none">⌘K</kbd>
               </button>
-              {/* Admin Login button — desktop */}
-              <Link href={isTokenValid(getAdminToken()) ? "/admin" : "/admin/login"}>
-                <button
-                  className="hidden lg:flex items-center gap-1.5 font-sans text-[10px] font-semibold tracking-widest uppercase text-[hsl(28,18%,35%)] hover:text-[hsl(225,50%,22%)] transition-colors border border-[hsl(35,15%,80%)] hover:border-[hsl(225,50%,22%)] rounded-full px-3 py-1.5"
-                  aria-label="Admin login"
-                >
-                  <Lock size={10} />
-                  {isTokenValid(getAdminToken()) ? "Admin" : "Log In"}
-                </button>
-              </Link>
               {/* Search icon — mobile */}
               <button
                 className="lg:hidden text-[hsl(28,18%,22%)] p-1"
@@ -221,12 +210,6 @@ export default function Navbar() {
                   </Link>
                 </motion.div>
               ))}
-              <Link href={isTokenValid(getAdminToken()) ? "/admin" : "/admin/login"}>
-                <span className="flex items-center gap-2 font-sans text-sm font-medium text-[hsl(28,18%,40%)] hover:text-[hsl(225,50%,22%)] transition-colors tracking-widest uppercase mt-1">
-                  <Lock size={13} />
-                  {isTokenValid(getAdminToken()) ? "Admin" : "Log In"}
-                </span>
-              </Link>
               <div className="flex items-center gap-6 mt-2">
                 <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-[hsl(28,18%,35%)]">
                   <FaTiktok size={20} />

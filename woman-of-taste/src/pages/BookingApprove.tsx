@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useLocation } from "wouter";
+import { useParams } from "wouter";
+import { ADMIN_URL } from "@/lib/adminUrl";
 
 type State = "loading" | "success" | "already" | "expired" | "invalid" | "error";
 
@@ -16,7 +17,6 @@ interface BookingInfo {
 
 export default function BookingApprove() {
   const { token } = useParams<{ token: string }>();
-  const [, navigate] = useLocation();
   const [state, setState] = useState<State>("loading");
   const [info, setInfo] = useState<BookingInfo | null>(null);
   const [message, setMessage] = useState("");
@@ -49,12 +49,12 @@ export default function BookingApprove() {
     if (state !== "success") return;
     const interval = setInterval(() => {
       setCountdown(c => {
-        if (c <= 1) { clearInterval(interval); navigate("/admin/bookings"); return 0; }
+        if (c <= 1) { clearInterval(interval); window.location.href = `${ADMIN_URL}/admin/bookings`; return 0; }
         return c - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [state, navigate]);
+  }, [state]);
 
   return (
     <div style={{
@@ -90,9 +90,9 @@ export default function BookingApprove() {
         </div>
 
         <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
-          <Link href="/admin/bookings" style={{ fontSize: "0.75rem", color: "hsl(225,50%,40%)", textDecoration: "none" }}>
+          <a href={`${ADMIN_URL}/admin/bookings`} style={{ fontSize: "0.75rem", color: "hsl(225,50%,40%)", textDecoration: "none" }}>
             → Go to Admin Bookings
-          </Link>
+          </a>
         </div>
       </div>
     </div>

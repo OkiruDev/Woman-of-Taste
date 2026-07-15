@@ -1,6 +1,6 @@
 import { Router } from "express";
 import OpenAI from "openai";
-import jwt from "jsonwebtoken";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const contentGenRouter = Router();
 
@@ -8,17 +8,6 @@ const openai = new OpenAI({
   baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
   apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ?? "placeholder",
 });
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : req.query?.token;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 const ANIMATED_DIVIDER = `<div style="text-align:center;margin:2.5rem 0;"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="32" viewBox="0 0 300 32"><style>@keyframes wotFade{0%,100%{opacity:.45}50%{opacity:1}}.d1{animation:wotFade 2.8s ease-in-out infinite}.d2{animation:wotFade 2.8s ease-in-out infinite .5s}.d3{animation:wotFade 2.8s ease-in-out infinite 1s}</style><line x1="0" y1="16" x2="108" y2="16" stroke="#c9a96e" stroke-width="0.9" class="d1"/><path d="M116 16 L123 9 L130 16 L123 23 Z" fill="none" stroke="#c9a96e" stroke-width="1.2" class="d2"/><circle cx="150" cy="16" r="4.5" fill="#c9a96e" class="d3"/><path d="M170 16 L177 9 L184 16 L177 23 Z" fill="none" stroke="#c9a96e" stroke-width="1.2" class="d2"/><line x1="192" y1="16" x2="300" y2="16" stroke="#c9a96e" stroke-width="0.9" class="d1"/></svg></div>`;
 

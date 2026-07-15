@@ -1,19 +1,8 @@
 import { Router } from "express";
 import { BetaAnalyticsDataClient } from "@google-analytics/data";
-import jwt from "jsonwebtoken";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const websiteAnalyticsRouter = Router();
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : req.query?.token;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 function getGA4Client() {
   const credRaw = process.env["GA4_CREDENTIALS"];

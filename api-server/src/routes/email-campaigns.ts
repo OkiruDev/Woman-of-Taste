@@ -3,21 +3,10 @@ import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { emailCampaignsTable, emailSendsTable, emailEventsTable, contactsTable, activityLogTable, bookingsTable } from "@workspace/db/schema";
 import { createTransporter } from "../utils/mailer.js";
-import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const emailRouter = Router();
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : req.query?.token;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 async function logActivity(actionType: string, description: string, entityType = "", entityId = "") {
   try { await db.insert(activityLogTable).values({ actionType, description, entityType, entityId }); } catch {}

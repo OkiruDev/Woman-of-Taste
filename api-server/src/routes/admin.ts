@@ -11,34 +11,11 @@ import { buildFollowup1Email, buildInvoiceConfirmationEmail, buildDeclineEmail, 
 import { getEventArrivalDetails } from "../utils/eventArrivalConfig.js";
 import { sendWeeklyContentReminder } from "../utils/contentReminder.js";
 import { sendMonthlySocialReminder } from "../utils/socialReminder.js";
+import { getJwtSecret, requireAdminAuth as authMiddleware, requireAdminAuthAllowQueryToken } from "../middlewares/adminAuth.js";
 import fs from "fs";
 import path from "path";
 
 const adminRouter = Router();
-
-function getJwtSecret(): string {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function verifyToken(token?: string): boolean {
-  if (!token) return false;
-  try {
-    jwt.verify(token, getJwtSecret());
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const headerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
-  const queryToken = req.query?.token as string | undefined;
-  if (!verifyToken(headerToken ?? queryToken)) {
-    return res.status(401).json({ ok: false, error: "Unauthorized." });
-  }
-  next();
-}
 
 const ADMIN_DOMAIN = "womanoftaste.co.za";
 
@@ -63,7 +40,14 @@ adminRouter.post("/admin/auth", (req, res) => {
     return res.status(401).json({ ok: false, error: "Incorrect password." });
   }
 
-  const token = jwt.sign({ role: "admin", email: email.trim().toLowerCase() }, getJwtSecret(), { expiresIn: "8h" });
+  let jwtSecret: string;
+  try {
+    jwtSecret = getJwtSecret();
+  } catch {
+    return res.status(503).json({ ok: false, error: "JWT secret not configured. Set JWT_SECRET secret." });
+  }
+
+  const token = jwt.sign({ role: "admin", email: email.trim().toLowerCase() }, jwtSecret, { expiresIn: "8h" });
   return res.json({ ok: true, token });
 });
 
@@ -629,8 +613,8 @@ adminRouter.post("/admin/bookings/:id/cancel-nonpayment", authMiddleware, async 
   });
 });
 
-// GET /api/admin/bookings/:id/invoice — download PDF
-adminRouter.get("/admin/bookings/:id/invoice", authMiddleware, async (req, res) => {
+// GET /api/admin/bookings/:id/invoice — download PDF (navigated to directly, so it accepts ?token= too)
+adminRouter.get("/admin/bookings/:id/invoice", requireAdminAuthAllowQueryToken, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ ok: false, error: "Invalid ID." });
 

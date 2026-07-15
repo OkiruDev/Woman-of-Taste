@@ -1,21 +1,10 @@
 import { Router } from "express";
 import { eq, asc } from "drizzle-orm";
-import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
 import { sql } from "drizzle-orm";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const router = Router();
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-function authMiddleware(req: any, res: any, next: any) {
-  const token = req.headers.authorization?.startsWith("Bearer ")
-    ? req.headers.authorization.slice(7) : undefined;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); }
-  catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 // ── Event Projects ────────────────────────────────────────────────────────────
 

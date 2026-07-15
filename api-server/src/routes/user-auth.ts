@@ -4,12 +4,9 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
 import { usersTable, userProfilesTable } from "@workspace/db/schema";
+import { getJwtSecret } from "../middlewares/adminAuth.js";
 
 const userAuthRouter = Router();
-
-function getJwtSecret(): string {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
 
 export function getUserFromToken(token?: string): { userId: number; email: string | null } | null {
   if (!token) return null;

@@ -2,48 +2,40 @@ import { Router } from "express";
 import { eq, desc, ilike, and, or } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { blogPostsTable, blogCategoriesTable, activityLogTable } from "@workspace/db/schema";
-import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
-import fs from "fs";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
+import { uploadPublicFile } from "../utils/objectStorage.js";
 
+const blogPublicRouter = Router();
 const blogAdminRouter = Router();
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : req.query?.token;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 async function logActivity(actionType: string, description: string, entityType = "", entityId = "") {
   try { await db.insert(activityLogTable).values({ actionType, description, entityType, entityId }); } catch {}
 }
 
-// File upload setup
-const uploadDir = path.join(process.cwd(), "public", "uploads", "blog");
-fs.mkdirSync(uploadDir, { recursive: true });
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+// File upload setup — buffered in memory, then pushed to object storage (see objectStorage.ts)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    cb(null, allowed.includes(path.extname(file.originalname).toLowerCase()));
   },
 });
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (_req, file, cb) => {
-  const allowed = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
-  cb(null, allowed.includes(path.extname(file.originalname).toLowerCase()));
-}});
 
 // POST /api/admin/upload — image upload
-blogAdminRouter.post("/admin/upload", authMiddleware, upload.single("image"), (req: any, res) => {
+blogAdminRouter.post("/admin/upload", authMiddleware, upload.single("image"), async (req: any, res) => {
   if (!req.file) return res.status(400).json({ ok: false, error: "No file uploaded." });
-  const url = `/uploads/blog/${req.file.filename}`;
-  return res.json({ ok: true, url });
+  try {
+    const ext = path.extname(req.file.originalname);
+    const key = `blog/${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+    const url = await uploadPublicFile(key, req.file.buffer, req.file.mimetype);
+    return res.json({ ok: true, url });
+  } catch (err: any) {
+    console.error("Blog image upload error:", err);
+    return res.status(503).json({ ok: false, error: err?.message ?? "Upload failed." });
+  }
 });
 
 // GET /api/admin/blog — list posts
@@ -146,7 +138,7 @@ blogAdminRouter.delete("/admin/blog/:id", authMiddleware, async (req, res) => {
 // ── Public blog routes ────────────────────────────────────────────────────────
 
 // GET /api/blog — public list (published only)
-blogAdminRouter.get("/blog", async (_req, res) => {
+blogPublicRouter.get("/blog", async (_req, res) => {
   const posts = await db.select({
     id: blogPostsTable.id, slug: blogPostsTable.slug, title: blogPostsTable.title,
     category: blogPostsTable.category, author: blogPostsTable.author,
@@ -158,17 +150,17 @@ blogAdminRouter.get("/blog", async (_req, res) => {
 });
 
 // GET /api/blog/categories — public categories
-blogAdminRouter.get("/blog/categories", async (_req, res) => {
+blogPublicRouter.get("/blog/categories", async (_req, res) => {
   const cats = await db.select().from(blogCategoriesTable).orderBy(blogCategoriesTable.name);
   return res.json({ ok: true, categories: cats.map(c => c.name) });
 });
 
 // GET /api/blog/:slug — single post
-blogAdminRouter.get("/blog/:slug", async (req, res) => {
+blogPublicRouter.get("/blog/:slug", async (req, res) => {
   const [post] = await db.select().from(blogPostsTable)
     .where(and(eq(blogPostsTable.slug, req.params.slug), eq(blogPostsTable.status, "published"))).limit(1);
   if (!post) return res.status(404).json({ ok: false, error: "Post not found." });
   return res.json({ ok: true, post });
 });
 
-export default blogAdminRouter;
+export { blogPublicRouter, blogAdminRouter };

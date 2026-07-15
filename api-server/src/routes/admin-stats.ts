@@ -5,22 +5,11 @@ import {
   contactsTable, bookingsTable, emailCampaignsTable, emailSendsTable,
   blogPostsTable, activityLogTable, adminSettingsTable,
 } from "@workspace/db/schema";
-import jwt from "jsonwebtoken";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const statsRouter = Router();
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : req.query?.token;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 // GET /api/admin/stats — dashboard stats
 statsRouter.get("/admin/stats", authMiddleware, async (_req, res) => {

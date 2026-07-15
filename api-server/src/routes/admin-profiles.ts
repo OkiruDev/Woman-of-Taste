@@ -1,28 +1,11 @@
 import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
-import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
 import { usersTable, userProfilesTable, eventAttendeesTable } from "@workspace/db/schema";
 import { createTransporter } from "../utils/mailer.js";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const adminProfilesRouter = Router();
-
-function getJwtSecret(): string {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : (req.query?.token as string);
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try {
-    const p = jwt.verify(token, getJwtSecret()) as any;
-    if (p.role !== "admin") return res.status(401).json({ ok: false, error: "Unauthorized." });
-    next();
-  } catch {
-    return res.status(401).json({ ok: false, error: "Unauthorized." });
-  }
-}
 
 // GET /api/admin/profiles — list all profiles with user email
 adminProfilesRouter.get("/admin/profiles", authMiddleware, async (_req, res) => {

@@ -87,7 +87,7 @@ function buildReminderEmail(weekLabel: string, suggestions: ContentSuggestions):
   const blogCards = suggestions.blogTopics.map((t, i) => topicCard(t, i, BLOG_ICON)).join("");
   const newsCards = suggestions.newsletterTopics.map((t, i) => topicCard(t, i, NEWS_ICON)).join("");
 
-  const appUrl = process.env["APP_URL"] ?? "https://womanoftaste.co.za";
+  const appUrl = process.env["ADMIN_APP_URL"] ?? "https://admin.womanoftaste.co.za";
 
   return `<!DOCTYPE html>
 <html lang="en">

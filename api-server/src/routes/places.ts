@@ -2,12 +2,13 @@ import { Router } from "express";
 import { eq, desc, ilike, and, or, count } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { placesTable, activityLogTable } from "@workspace/db/schema";
-import jwt from "jsonwebtoken";
 import OpenAI from "openai";
 import { createTransporter } from "../utils/mailer";
 import { SEED_PLACES } from "./placeSeedData";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
-const placesRouter = Router();
+const placesPublicRouter = Router();
+const placesAdminRouter = Router();
 
 
 async function autoSeed() {
@@ -70,17 +71,6 @@ const openai = new OpenAI({
   apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ?? "placeholder",
 });
 
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-
-function authMiddleware(req: any, res: any, next: any) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : req.query?.token;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); } catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
-
 async function logActivity(actionType: string, description: string) {
   try { await db.insert(activityLogTable).values({ actionType, description, entityType: "place", entityId: "" }); } catch {}
 }
@@ -92,7 +82,7 @@ function slugify(name: string): string {
 // ─── PUBLIC ──────────────────────────────────────────────────────────────────
 
 // GET /api/places — list all published places
-placesRouter.get("/places", async (_req, res) => {
+placesPublicRouter.get("/places", async (_req, res) => {
   try {
     const results = await db.select().from(placesTable)
       .where(eq(placesTable.status, "published"))
@@ -105,7 +95,7 @@ placesRouter.get("/places", async (_req, res) => {
 });
 
 // GET /api/places/:slug — single place
-placesRouter.get("/places/:slug", async (req, res) => {
+placesPublicRouter.get("/places/:slug", async (req, res) => {
   try {
     const [place] = await db.select().from(placesTable)
       .where(and(eq(placesTable.slug, req.params.slug), eq(placesTable.status, "published")));
@@ -119,7 +109,7 @@ placesRouter.get("/places/:slug", async (req, res) => {
 // ─── ADMIN ───────────────────────────────────────────────────────────────────
 
 // GET /api/admin/places — list all places (including drafts)
-placesRouter.get("/admin/places", authMiddleware, async (req, res) => {
+placesAdminRouter.get("/admin/places", authMiddleware, async (req, res) => {
   try {
     const { search, status } = req.query as Record<string, string>;
     let query = db.select().from(placesTable).$dynamic();
@@ -140,7 +130,8 @@ async function sendApprovalEmail(place: any) {
   if (!transporter) return;
 
   const APPROVAL_TO = "info@womanoftaste.co.za";
-  const adminUrl = `https://womanoftaste.co.za/admin/places`;
+  const adminAppUrl = process.env["ADMIN_APP_URL"] ?? "https://admin.womanoftaste.co.za";
+  const adminUrl = `${adminAppUrl}/admin/places`;
   const views = place.tiktokViews >= 1000
     ? `${(place.tiktokViews / 1000).toFixed(place.tiktokViews >= 10000 ? 0 : 1)}K`
     : String(place.tiktokViews);
@@ -227,7 +218,7 @@ async function sendApprovalEmail(place: any) {
 }
 
 // POST /api/admin/places — create a new place
-placesRouter.post("/admin/places", authMiddleware, async (req, res) => {
+placesAdminRouter.post("/admin/places", authMiddleware, async (req, res) => {
   try {
     const body = req.body as Record<string, any>;
     if (!body.name?.trim()) return res.status(400).json({ ok: false, error: "Name is required." });
@@ -286,7 +277,7 @@ placesRouter.post("/admin/places", authMiddleware, async (req, res) => {
 });
 
 // PUT /api/admin/places/:id — update place
-placesRouter.put("/admin/places/:id", authMiddleware, async (req, res) => {
+placesAdminRouter.put("/admin/places/:id", authMiddleware, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const body = req.body as Record<string, any>;
@@ -320,7 +311,7 @@ placesRouter.put("/admin/places/:id", authMiddleware, async (req, res) => {
 });
 
 // POST /api/admin/places/:id/approve — approve a pending place → published
-placesRouter.post("/admin/places/:id/approve", authMiddleware, async (req, res) => {
+placesAdminRouter.post("/admin/places/:id/approve", authMiddleware, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const [place] = await db.select().from(placesTable).where(eq(placesTable.id, id));
@@ -362,7 +353,7 @@ placesRouter.post("/admin/places/:id/approve", authMiddleware, async (req, res) 
 });
 
 // GET /api/admin/places/pending-count — quick badge count
-placesRouter.get("/admin/places/pending-count", authMiddleware, async (req, res) => {
+placesAdminRouter.get("/admin/places/pending-count", authMiddleware, async (req, res) => {
   try {
     const [row] = await db.select({ c: count() }).from(placesTable).where(eq(placesTable.status, "pending"));
     return res.json({ ok: true, count: row?.c ?? 0 });
@@ -372,7 +363,7 @@ placesRouter.get("/admin/places/pending-count", authMiddleware, async (req, res)
 });
 
 // DELETE /api/admin/places/:id
-placesRouter.delete("/admin/places/:id", authMiddleware, async (req, res) => {
+placesAdminRouter.delete("/admin/places/:id", authMiddleware, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const [deleted] = await db.delete(placesTable).where(eq(placesTable.id, id)).returning();
@@ -387,7 +378,7 @@ placesRouter.delete("/admin/places/:id", authMiddleware, async (req, res) => {
 // ─── AI CONTENT GENERATION ───────────────────────────────────────────────────
 
 // POST /api/admin/places/generate — AI-generate SEO content for a new place
-placesRouter.post("/admin/places/generate", authMiddleware, async (req, res) => {
+placesAdminRouter.post("/admin/places/generate", authMiddleware, async (req, res) => {
   const { name, category, cuisine, neighborhood, city, tiktokViews, tiktokUrl, priceRange, notes } =
     req.body as Record<string, any>;
 
@@ -446,4 +437,4 @@ Return ONLY a valid JSON object with these exact fields:
   }
 });
 
-export default placesRouter;
+export { placesPublicRouter, placesAdminRouter };

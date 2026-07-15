@@ -1,9 +1,9 @@
 import { Router } from "express";
 import OpenAI from "openai";
-import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
 import { blogPostsTable, emailCampaignsTable } from "@workspace/db/schema";
 import { sql } from "drizzle-orm";
+import { requireAdminAuth as authMiddleware } from "../middlewares/adminAuth.js";
 
 const router = Router();
 
@@ -11,17 +11,6 @@ const openai = new OpenAI({
   baseURL: process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"],
   apiKey: process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ?? "placeholder",
 });
-
-function getJwtSecret() {
-  return process.env["JWT_SECRET"] ?? process.env["SESSION_SECRET"] ?? "wot-admin-fallback";
-}
-function authMiddleware(req: any, res: any, next: any) {
-  const token = req.headers.authorization?.startsWith("Bearer ")
-    ? req.headers.authorization.slice(7) : undefined;
-  if (!token) return res.status(401).json({ ok: false, error: "Unauthorized." });
-  try { jwt.verify(token, getJwtSecret()); next(); }
-  catch { return res.status(401).json({ ok: false, error: "Unauthorized." }); }
-}
 
 function slugify(title: string) {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) + "-" + Date.now();

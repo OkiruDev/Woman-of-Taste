@@ -4,7 +4,7 @@ import { useParams, Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, CalendarDays, Clock, ChevronLeft, Loader2, CheckCircle, AlertCircle, Minus, Plus, Users } from "lucide-react";
 import Layout from "@/components/Layout";
-import { getEventById } from "@/data/events";
+import { getEventById, isEventPast } from "@/data/events";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import SignInModal from "@/components/SignInModal";
 
@@ -42,7 +42,7 @@ export default function EventDetail() {
   }, [event?.id]);
 
   useEffect(() => {
-    if (!event?.startDateIso) return;
+    if (!event?.startDateIso || isEventPast(event)) return;
     const schema: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Event",
@@ -148,6 +148,7 @@ export default function EventDetail() {
   const { theme } = event;
   const ticketTotal = (event.price ?? 0) * form.quantity;
   const isPrivate = event.type === "private";
+  const isPast = isEventPast(event);
   const bookingLocked = !isPrivate && event.bookingOpen !== true;
   const totalCapacity = event.totalCapacity ?? null;
   const totalTaken = confirmedTickets !== null
@@ -449,8 +450,39 @@ export default function EventDetail() {
                 style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(20px)" }}
               >
                 <AnimatePresence mode="wait">
+                  {/* ── EVENT PASSED ── */}
+                  {step === "form" && isPast && !isPrivate && (
+                    <motion.div key="past" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="text-center">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-5 text-2xl"
+                        style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                        🗂️
+                      </div>
+                      <span className="font-sans text-xs font-semibold tracking-[0.3em] uppercase mb-2 block" style={{ color: theme.accent }}>
+                        This Event Has Passed
+                      </span>
+                      <h3 className="font-serif text-2xl text-white mb-4">Thank you to everyone who joined us</h3>
+                      <p className="font-sans text-sm leading-relaxed mb-6" style={{ color: theme.textLight }}>
+                        Bookings are closed for {event.title}. Take a look at what's coming up next.
+                      </p>
+                      {totalCapacity !== null && confirmedTickets !== null && (
+                        <div className="rounded-2xl p-5 mb-6 text-left"
+                          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                          <p className="font-sans text-[10px] tracking-widest uppercase mb-1" style={{ color: theme.accent }}>Attendance</p>
+                          <p className="font-serif text-xl text-white">{confirmedTickets} of {totalCapacity} seats booked</p>
+                        </div>
+                      )}
+                      <Link href="/events">
+                        <button className="w-full font-sans text-xs font-semibold tracking-widest uppercase py-4 rounded-full text-white transition-all"
+                          style={{ background: `linear-gradient(135deg, ${theme.accentDark}, ${theme.accent})`, color: "#1a1008" }}>
+                          See Upcoming Events →
+                        </button>
+                      </Link>
+                    </motion.div>
+                  )}
+
                   {/* ── HIGH TEA PROFILE CTA (profile-gated) ── */}
-                  {step === "form" && event.id === "high-tea-buitengeluk-jun-2026" && event.bookingOpen && (
+                  {step === "form" && !isPast && event.id === "high-tea-buitengeluk-jun-2026" && event.bookingOpen && (
                     <motion.div key="profile-cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                       <span className="font-sans text-xs font-semibold tracking-[0.3em] uppercase mb-2 block" style={{ color: theme.accent }}>
                         Applications Open
@@ -505,7 +537,7 @@ export default function EventDetail() {
                   )}
 
                   {/* ── TICKETS AVAILABLE SOON (locked events) ── */}
-                  {step === "form" && bookingLocked && event.id !== "high-tea-buitengeluk-jun-2026" && (
+                  {step === "form" && !isPast && bookingLocked && event.id !== "high-tea-buitengeluk-jun-2026" && (
                     <motion.div key="locked" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                       {/* Coming soon banner */}
                       <div className="rounded-2xl p-6 mb-6 text-center" style={{ background: "rgba(255,255,255,0.08)", border: `1px solid ${theme.accent}55` }}>
@@ -545,7 +577,7 @@ export default function EventDetail() {
                   )}
 
                   {/* ── FORM (public events, booking open) ── */}
-                  {step === "form" && !isPrivate && !bookingLocked && event.id !== "high-tea-buitengeluk-jun-2026" && (
+                  {step === "form" && !isPast && !isPrivate && !bookingLocked && event.id !== "high-tea-buitengeluk-jun-2026" && (
                     <motion.form
                       key="form"
                       initial={{ opacity: 0 }}

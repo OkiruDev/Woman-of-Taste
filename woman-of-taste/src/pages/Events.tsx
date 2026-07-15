@@ -7,7 +7,7 @@ import Layout from "@/components/Layout";
 import FAQ from "@/components/FAQ";
 import { faqsByPage } from "@/data/faqData";
 import AnimatedBackground from "@/components/AnimatedBackground";
-import { getUpcomingEvents, getPrivateEvents, Event } from "@/data/events";
+import { getUpcomingEvents, getPastEvents, getPrivateEvents, Event } from "@/data/events";
 
 const API_BASE = "/api";
 
@@ -83,11 +83,12 @@ function EventAgendaStrip({ events }: { events: Event[] }) {
 
 export default function Events() {
   const upcoming = getUpcomingEvents();
+  const past = getPastEvents();
   const privateEvents = getPrivateEvents();
   const [seatMap, setSeatMap] = useState<Record<string, SeatData>>({});
 
   useEffect(() => {
-    upcoming
+    [...upcoming, ...past]
       .filter((e) => e.totalCapacity)
       .forEach((e) => {
         fetch(`${API_BASE}/events/${e.id}/seats`)
@@ -254,6 +255,88 @@ export default function Events() {
           </div>
         </div>
       </section>
+
+      {/* ── Past Events ── */}
+      {past.length > 0 && (
+        <section className="py-20 bg-[hsl(225,50%,22%)]">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12">
+            <motion.div className="mb-14" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <span className="font-sans text-xs font-semibold tracking-[0.3em] uppercase text-[hsl(38,45%,65%)] mb-2 block">
+                Look Back
+              </span>
+              <h2 className="font-serif text-4xl sm:text-5xl font-light text-[hsl(40,25%,96%)]">
+                Past Events
+              </h2>
+            </motion.div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              {past.map((event, i) => {
+                const seats = seatMap[event.id];
+                const attended = seats?.confirmedTickets ?? 0;
+                return (
+                  <motion.article
+                    key={event.id}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
+                    className="group overflow-hidden rounded-3xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.06)] transition-all duration-500 cursor-pointer"
+                  >
+                    <Link href={`/events/${event.id}`} className="block">
+                      <div className="h-40 relative overflow-hidden" style={{ background: event.theme.gradient, filter: "grayscale(0.4) brightness(0.7)" }}>
+                        <div className="absolute inset-0 opacity-[0.06] pointer-events-none">
+                          <img src="/wot-logo.png" alt="" className="w-full h-full object-contain" style={{ mixBlendMode: "screen" }} />
+                        </div>
+                        <div className="absolute top-5 left-6">
+                          <span
+                            className="font-sans text-[10px] font-semibold tracking-[0.2em] uppercase px-3 py-1 rounded-full"
+                            style={{ background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.75)", backdropFilter: "blur(8px)" }}
+                          >
+                            Event Passed
+                          </span>
+                        </div>
+                        {event.totalCapacity != null && (
+                          <div className="absolute top-5 right-6">
+                            <span
+                              className="font-sans text-[10px] font-semibold tracking-wider uppercase px-3 py-1 rounded-full"
+                              style={{ background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.75)", backdropFilter: "blur(8px)" }}
+                            >
+                              {attended} of {event.totalCapacity} seats booked
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-8">
+                        <h3 className="font-serif text-2xl font-medium text-[hsl(40,25%,90%)] mb-1 leading-snug">
+                          {event.title}
+                        </h3>
+                        <p className="font-serif text-sm text-[hsl(38,45%,65%)] italic mb-5">{event.subtitle}</p>
+
+                        <div className="flex flex-wrap gap-4 mb-6">
+                          <span className="flex items-center gap-1.5 font-sans text-xs text-[rgba(255,255,255,0.6)]">
+                            <CalendarDays size={12} className="text-[hsl(38,45%,55%)]" />
+                            {event.date}
+                          </span>
+                          <span className="flex items-center gap-1.5 font-sans text-xs text-[rgba(255,255,255,0.6)]">
+                            <MapPin size={12} className="text-[hsl(38,45%,55%)]" />
+                            {event.location}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 font-sans text-xs font-semibold tracking-widest uppercase text-[hsl(38,45%,65%)] group-hover:text-[hsl(38,45%,80%)] transition-colors">
+                          View Recap
+                          <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Private Experiences ── */}
       <section className="py-20 bg-[hsl(35,15%,93%)]">

@@ -266,6 +266,13 @@ export const events: Event[] = [
   },
 ];
 
-export const getUpcomingEvents = () => events.filter((e) => e.type === "upcoming");
+export const isEventPast = (event: Event): boolean =>
+  event.startDateIso ? new Date(event.startDateIso).getTime() < Date.now() : false;
+
+export const getUpcomingEvents = () => events.filter((e) => e.type === "upcoming" && !isEventPast(e));
+export const getPastEvents = () =>
+  events
+    .filter((e) => e.type === "upcoming" && isEventPast(e))
+    .sort((a, b) => new Date(b.startDateIso!).getTime() - new Date(a.startDateIso!).getTime());
 export const getPrivateEvents = () => events.filter((e) => e.type === "private");
 export const getEventById = (id: string) => events.find((e) => e.id === id);

@@ -153,7 +153,7 @@ profilesRouter.post("/profile/submit", userAuthMiddleware, async (req: any, res)
 </td></tr>
 <tr><td style="padding:40px 48px">
 <p style="font-family:Georgia,serif;font-size:18px;font-style:italic;color:#1c2d5e;margin:0 0 20px">Dear ${profile.preferredName ?? profile.fullName},</p>
-<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8;margin:0 0 16px">Thank you for submitting your profile for the <strong>High Tea at Buitengeluk</strong> on 16 June 2026.</p>
+<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8;margin:0 0 16px">Thank you for submitting your profile for the <strong>High Tea at Buitengeluk</strong> on 22 August 2026.</p>
 <p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8;margin:0 0 24px">The Woman of Taste team will review your application and confirm within 48 hours. We look forward to welcoming you.</p>
 <p style="font-family:Arial,sans-serif;font-size:14px;color:#7a6a54;margin:0">With warmth,<br><strong>Patience Bwanya (PashieB)</strong><br>Woman of Taste</p>
 </td></tr>

@@ -99,7 +99,7 @@ async function sendStatusEmail(email: string, profile: any, status: "approved" |
     approved: {
       subject: "You're in — High Tea at Buitengeluk 🫖",
       body: `<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">Dear <strong>${name}</strong>,</p>
-<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">We are delighted to confirm your place at <strong>High Tea at Buitengeluk</strong> on 16 June 2026.</p>
+<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">We are delighted to confirm your place at <strong>High Tea at Buitengeluk</strong> on 22 August 2026.</p>
 <p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">You now have access to the attendee room — visit your event page to meet the other women joining us.</p>
 <p style="font-family:Arial,sans-serif;font-size:14px;color:#7a6a54">We look forward to welcoming you.<br><strong>Patience Bwanya (PashieB)</strong><br>Woman of Taste</p>`,
     },
@@ -113,7 +113,7 @@ async function sendStatusEmail(email: string, profile: any, status: "approved" |
     waitlisted: {
       subject: "You're on the waitlist — High Tea at Buitengeluk",
       body: `<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">Dear <strong>${name}</strong>,</p>
-<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">Thank you for applying. We have added you to the waitlist for the <strong>High Tea at Buitengeluk</strong> on 16 June 2026.</p>
+<p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">Thank you for applying. We have added you to the waitlist for the <strong>High Tea at Buitengeluk</strong> on 22 August 2026.</p>
 <p style="font-family:Arial,sans-serif;font-size:15px;color:#3a2e20;line-height:1.8">If a place becomes available, you will be the first to know.</p>
 <p style="font-family:Arial,sans-serif;font-size:14px;color:#7a6a54">With warmth,<br><strong>Patience Bwanya (PashieB)</strong><br>Woman of Taste</p>`,
     },

@@ -107,7 +107,7 @@ export default function AdminProfiles() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="font-serif text-2xl text-[hsl(225,50%,22%)]">High Tea Profiles</h1>
-            <p className="font-sans text-sm text-[hsl(28,18%,40%)] mt-0.5">Buitengeluk · 16 June 2026</p>
+            <p className="font-sans text-sm text-[hsl(28,18%,40%)] mt-0.5">Buitengeluk · 22 August 2026</p>
           </div>
           <div className="flex items-center gap-2">
             <Users size={16} className="text-[hsl(28,18%,50%)]" />

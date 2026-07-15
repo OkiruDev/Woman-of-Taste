@@ -412,7 +412,7 @@ export default function ProfileSetup() {
           {/* Header */}
           <div className="text-center mb-8">
             <span className="font-sans text-[11px] font-semibold tracking-[0.3em] uppercase text-[hsl(38,45%,48%)]">
-              High Tea at Buitengeluk · 16 June 2026
+              High Tea at Buitengeluk · 22 August 2026
             </span>
             <h1 className="font-serif text-4xl font-light text-[hsl(225,50%,22%)] mt-2 mb-1">Your Profile</h1>
             <p className="font-sans text-sm text-[hsl(28,18%,40%)]">

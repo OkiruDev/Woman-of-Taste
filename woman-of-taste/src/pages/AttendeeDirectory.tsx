@@ -316,7 +316,7 @@ export default function AttendeeDirectory() {
         <section className="bg-[hsl(225,50%,22%)] pt-28 pb-12 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10" style={{ background: "radial-gradient(ellipse at top right, hsl(38,45%,60%), transparent 60%)" }} />
           <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-12">
-            <span className="font-sans text-[11px] font-semibold tracking-[0.3em] uppercase text-[hsl(38,45%,55%)] mb-3 block">16 June 2026 · Buitengeluk, Broadacres</span>
+            <span className="font-sans text-[11px] font-semibold tracking-[0.3em] uppercase text-[hsl(38,45%,55%)] mb-3 block">22 August 2026 · Buitengeluk, Broadacres</span>
             <h1 className="font-serif text-4xl sm:text-5xl font-light text-[hsl(40,25%,96%)] mb-3">The Room</h1>
             <p className="font-sans text-sm text-[hsl(40,25%,75%)]">{attendees.length} women joining us</p>
           </div>

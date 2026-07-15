@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "wouter";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, type Variants } from "framer-motion";
 import { ArrowRight, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaTiktok, FaInstagram } from "react-icons/fa";
 import Layout from "@/components/Layout";
@@ -9,7 +9,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 import EventCalendarWidget from "@/components/EventCalendarWidget";
 import { socialLinks, partnerLinks } from "@/data/social";
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 32 },
   visible: (i: number) => ({
     opacity: 1,

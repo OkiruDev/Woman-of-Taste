@@ -72,7 +72,7 @@ function NotesModal({ booking, onClose, onSaved }: { booking: Booking; onClose: 
 }
 
 // Mobile booking card
-function BookingCard({ b, busy, onAction, onDownload, onNotes, onDelete }: {
+function BookingCard({ b, busy, onAction, onDownload, onNotes, onDelete, onRefundRequest }: {
   b: Booking; busy: boolean;
   onAction: (id: number, endpoint: string) => void;
   onDownload: (id: number) => void;

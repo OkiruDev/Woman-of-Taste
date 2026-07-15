@@ -302,7 +302,7 @@ const EVENTS = [
 // ---------------------------------------------------------------------------
 
 async function loadPg() {
-  const libDbPath = path.resolve(__dirname, "../../../lib/db/node_modules/pg");
+  const libDbPath = path.resolve(__dirname, "../../lib/db/node_modules/pg");
   try {
     const require = createRequire(import.meta.url);
     const pg = require(libDbPath);

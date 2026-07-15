@@ -171,11 +171,11 @@ router.post("/chat", async (req, res) => {
     }
 
     res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-    res.end();
+    return res.end();
   } catch (err) {
     console.error("Chat error:", err);
     res.write(`data: ${JSON.stringify({ error: "Something went wrong. Please try again." })}\n\n`);
-    res.end();
+    return res.end();
   }
 });
 
@@ -333,10 +333,10 @@ router.post("/chat/notify", async (req, res) => {
       console.log("[chat/notify] Contact data:", contactData);
     }
 
-    res.json({ ok: true });
+    return res.json({ ok: true });
   } catch (err) {
     console.error("[chat/notify] Error:", err);
-    res.json({ ok: true });
+    return res.json({ ok: true });
   }
 });
 

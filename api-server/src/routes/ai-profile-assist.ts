@@ -52,10 +52,10 @@ Return ONLY a valid JSON object with exactly these keys:
     if (!match) return res.status(500).json({ ok: false, error: "Aura returned an unexpected format. Please try again." });
 
     const parsed = JSON.parse(match[0]);
-    res.json({ ok: true, profile: parsed });
+    return res.json({ ok: true, profile: parsed });
   } catch (err: any) {
     console.error("[ai-profile-assist]", err?.message ?? err);
-    res.status(500).json({ ok: false, error: "Aura is unavailable right now. Please try again shortly." });
+    return res.status(500).json({ ok: false, error: "Aura is unavailable right now. Please try again shortly." });
   }
 });
 

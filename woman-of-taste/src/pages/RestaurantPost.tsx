@@ -18,7 +18,7 @@ const NAVY = "hsl(225,50%,22%)";
 const GOLD = "hsl(38,45%,65%)";
 const IVORY = "hsl(40,25%,96%)";
 
-const CATEGORY_COLOR = { Restaurant: NAVY, Experience: "#7c3aed", Stay: "#065f46" };
+const CATEGORY_COLOR: Record<string, string> = { Restaurant: NAVY, Experience: "#7c3aed", Stay: "#065f46" };
 
 export default function RestaurantPost() {
   const params = useParams<{ slug: string }>();
@@ -265,7 +265,7 @@ export default function RestaurantPost() {
 
         {/* Description */}
         <article>
-          {place.description.split("\n\n").filter(Boolean).map((para, i) => (
+          {place.description.split("\n\n").filter(Boolean).map((para: string, i: number) => (
             <p key={i} style={{ fontFamily: "Raleway, sans-serif", fontSize: "1rem", color: "#444", lineHeight: 1.85, marginBottom: "1.5rem" }}>{para}</p>
           ))}
         </article>
@@ -275,7 +275,7 @@ export default function RestaurantPost() {
           <section style={{ margin: "2.5rem 0" }}>
             <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", color: NAVY, marginBottom: "1rem" }}>What to Know</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-              {place.highlights.map((h, i) => (
+              {place.highlights.map((h: string, i: number) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, background: IVORY, borderRadius: 10, padding: "0.75rem 1rem" }}>
                   <CheckCircle size={15} color={GOLD} style={{ marginTop: 2, flexShrink: 0 }} />
                   <span style={{ fontFamily: "Raleway, sans-serif", fontSize: "0.88rem", color: NAVY }}>{h}</span>
@@ -292,7 +292,7 @@ export default function RestaurantPost() {
               {place.category === "Stay" ? "Must-Do Moments" : place.category === "Experience" ? "What to Do" : "Must-Try"}
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-              {place.mustTry.map((item, i) => (
+              {place.mustTry.map((item: { name: string; note: string }, i: number) => (
                 <div key={i} style={{ borderLeft: `3px solid ${GOLD}`, paddingLeft: "1rem" }}>
                   <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.1rem", fontWeight: 700, color: NAVY, marginBottom: 3 }}>{item.name}</div>
                   <div style={{ fontFamily: "Raleway, sans-serif", fontSize: "0.88rem", color: "#666", fontStyle: "italic", lineHeight: 1.6 }}>{item.note}</div>
@@ -311,7 +311,7 @@ export default function RestaurantPost() {
           <div style={{ background: IVORY, borderRadius: 16, padding: "1.4rem 1.5rem" }}>
             <h3 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.15rem", color: NAVY, marginBottom: "0.65rem" }}>Perfect For</h3>
             <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              {place.perfectFor.map((p, i) => (
+              {place.perfectFor.map((p: string, i: number) => (
                 <li key={i} style={{ fontFamily: "Raleway, sans-serif", fontSize: "0.85rem", color: "#555", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: GOLD, flexShrink: 0, display: "inline-block" }} />
                   {p}
@@ -323,7 +323,7 @@ export default function RestaurantPost() {
 
         {/* Tags */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "2rem" }}>
-          {place.tags.map(tag => (
+          {place.tags.map((tag: string) => (
             <span key={tag} style={{ background: IVORY, borderRadius: 99, padding: "4px 12px", fontFamily: "Raleway, sans-serif", fontSize: "0.74rem", fontWeight: 600, color: "#666" }}>{tag}</span>
           ))}
         </div>

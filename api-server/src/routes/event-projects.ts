@@ -46,13 +46,13 @@ router.post("/admin/event-projects", authMiddleware, async (req, res) => {
   try {
     const { title, description, eventDate, venue, venueContact, capacity, status, totalBudget, notes } = req.body;
     if (!title) return res.status(400).json({ ok: false, error: "Title required." });
-    const [row] = await db.execute(sql`
+    const rows = await db.execute(sql`
       INSERT INTO event_projects (title, description, event_date, venue, venue_contact, capacity, status, total_budget, notes)
       VALUES (${title}, ${description ?? null}, ${eventDate ?? null}, ${venue ?? null}, ${venueContact ?? null},
               ${capacity ?? null}, ${status ?? "planning"}, ${totalBudget ?? null}, ${notes ?? null})
       RETURNING *
     `);
-    return res.json({ ok: true, project: (row as any) });
+    return res.json({ ok: true, project: rows.rows[0] });
   } catch (err) {
     console.error("[event-projects POST]", err);
     return res.status(500).json({ ok: false, error: "Failed to create project." });

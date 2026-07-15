@@ -40,6 +40,7 @@ export default function TicketModal({ event, onClose }: Props) {
       window.addEventListener("keydown", onKey);
       return () => window.removeEventListener("keydown", onKey);
     }
+    return undefined;
   }, [event, onClose]);
 
   const price = event?.price ?? 0;

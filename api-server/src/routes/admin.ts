@@ -127,7 +127,7 @@ adminRouter.post("/admin/bookings/:id/paid", authMiddleware, async (req, res) =>
 
   await db
     .update(bookingsTable)
-    .set({ status: "PAID", paidAt: new Date(), qrToken, checkedIn: "false", updatedAt: new Date() })
+    .set({ status: "PAID", paidAt: new Date(), qrToken, checkedIn: false, updatedAt: new Date() })
     .where(eq(bookingsTable.id, id));
 
   // Send cinema ticket email with embedded QR code
@@ -248,7 +248,7 @@ adminRouter.get("/ticket/:qrToken", async (req, res) => {
       quantity: booking.quantity,
       pricePerTicket: booking.pricePerTicket,
       totalAmount: booking.totalAmount,
-      checkedIn: booking.checkedIn === "true",
+      checkedIn: booking.checkedIn,
       checkedInAt: booking.checkedInAt,
     },
   });
@@ -268,7 +268,7 @@ adminRouter.post("/admin/check-in/:qrToken", authMiddleware, async (req, res) =>
   if (!booking) return res.status(404).json({ ok: false, error: "Ticket not found." });
   if (booking.status !== "PAID") return res.status(400).json({ ok: false, error: "Only paid bookings can be checked in." });
 
-  if (booking.checkedIn === "true") {
+  if (booking.checkedIn) {
     return res.json({
       ok: true,
       alreadyCheckedIn: true,
@@ -285,7 +285,7 @@ adminRouter.post("/admin/check-in/:qrToken", authMiddleware, async (req, res) =>
 
   await db
     .update(bookingsTable)
-    .set({ checkedIn: "true", checkedInAt: new Date(), updatedAt: new Date() })
+    .set({ checkedIn: true, checkedInAt: new Date(), updatedAt: new Date() })
     .where(eq(bookingsTable.id, booking.id));
 
   return res.json({
@@ -316,11 +316,11 @@ adminRouter.post("/admin/bookings/:id/check-in", authMiddleware, async (req, res
   if (!booking) return res.status(404).json({ ok: false, error: "Booking not found." });
   if (booking.status !== "PAID") return res.status(400).json({ ok: false, error: "Only paid bookings can be checked in." });
 
-  const alreadyCheckedIn = booking.checkedIn === "true";
+  const alreadyCheckedIn = booking.checkedIn;
   if (!alreadyCheckedIn) {
     await db
       .update(bookingsTable)
-      .set({ checkedIn: "true", checkedInAt: new Date(), updatedAt: new Date() })
+      .set({ checkedIn: true, checkedInAt: new Date(), updatedAt: new Date() })
       .where(eq(bookingsTable.id, id));
   }
 
@@ -362,7 +362,7 @@ adminRouter.get("/admin/attendance", authMiddleware, async (req, res) => {
     eventDate: b.eventDate,
     eventId: b.eventId,
     quantity: b.quantity,
-    checkedIn: b.checkedIn === "true",
+    checkedIn: b.checkedIn,
     checkedInAt: b.checkedInAt,
     paidAt: b.paidAt,
   }));

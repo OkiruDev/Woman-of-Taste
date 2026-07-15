@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type JSX } from "react";
 import { useParams, Link } from "wouter";
 import { useAdminAuth, adminFetch } from "../AdminLogin";
 import AdminLayout from "../AdminLayout";
@@ -63,6 +63,11 @@ interface Project {
   venue?: string; venue_contact?: string; capacity?: number; status: string;
   total_budget?: number; notes?: string;
 }
+interface ProjectUpdate {
+  title?: string; description?: string; eventDate?: string;
+  venue?: string; venueContact?: string; capacity?: number;
+  status?: string; totalBudget?: number; notes?: string;
+}
 interface Milestone {
   id: number; title: string; description?: string; due_date?: string;
   status: string; sort_order: number;
@@ -73,7 +78,7 @@ interface BudgetItem {
 }
 
 // ── Tab: Overview ─────────────────────────────────────────────────────────────
-function OverviewTab({ project, onSave }: { project: Project; onSave: (p: Partial<Project>) => Promise<void> }) {
+function OverviewTab({ project, onSave }: { project: Project; onSave: (p: Partial<ProjectUpdate>) => Promise<void> }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ ...project });
   const [saving, setSaving] = useState(false);
@@ -362,7 +367,7 @@ function MilestonesTab({ projectId }: { projectId: number }) {
 }
 
 // ── Tab: Budget ───────────────────────────────────────────────────────────────
-function BudgetTab({ project, onSave }: { project: Project; onSave: (p: Partial<Project>) => Promise<void> }) {
+function BudgetTab({ project, onSave }: { project: Project; onSave: (p: Partial<ProjectUpdate>) => Promise<void> }) {
   const [items, setItems] = useState<BudgetItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -594,7 +599,7 @@ export default function EventProject() {
   }
   useEffect(() => { load(); }, [id]);
 
-  async function save(patch: Partial<Project>) {
+  async function save(patch: Partial<ProjectUpdate>) {
     const d = await adminFetch(`/admin/event-projects/${id}`, { method: "PATCH", body: JSON.stringify(patch) }).then(r => r.json());
     if (d.ok) setProject(d.project);
   }

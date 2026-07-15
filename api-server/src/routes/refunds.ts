@@ -39,6 +39,9 @@ refundsRouter.post("/admin/bookings/:id/refund-request", authMiddleware, async (
     return res.status(409).json({ ok: false, error: "A refund request is already active for this booking.", refundId: active.id });
   }
 
+  const transporter = createTransporter();
+  if (!transporter) return res.status(503).json({ ok: false, error: "Email not configured." });
+
   const token = randomBytes(32).toString("hex");
   const appUrl = process.env["APP_URL"] ?? "https://womanoftaste.co.za";
   const refundUrl = `${appUrl}/refund/${token}`;
@@ -56,7 +59,6 @@ refundsRouter.post("/admin/bookings/:id/refund-request", authMiddleware, async (
     status: "PENDING_DETAILS",
   }).returning();
 
-  const transporter = await createTransporter();
   const { subject, html } = buildRefundRequestEmail({
     firstName: booking.firstName,
     eventTitle: booking.eventTitle,
@@ -127,7 +129,8 @@ refundsRouter.post("/refund/:token", async (req, res) => {
     .where(eq(refundRequestsTable.token, token));
 
   try {
-    const transporter = await createTransporter();
+    const transporter = createTransporter();
+    if (!transporter) throw new Error("Email not configured.");
     const appUrl = process.env["APP_URL"] ?? "https://womanoftaste.co.za";
     const { subject, html } = buildRefundSubmittedAdminEmail({
       firstName: refund.firstName,

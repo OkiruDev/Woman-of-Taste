@@ -6,5 +6,5 @@ watchPatterns = ["**"]
 
 [deploy]
 startCommand = "node api-server/dist/index.cjs"
-healthcheckPath = "/api/health"
+healthcheckPath = "/api/healthz"
 healthcheckTimeout = 300

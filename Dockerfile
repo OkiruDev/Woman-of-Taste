@@ -1,10 +1,7 @@
 FROM node:22-alpine
 WORKDIR /app
 
-ENV PNPM_HOME="/root/.local/share/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-
-RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
+RUN npm install -g pnpm@10.15.1
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY api-server/package.json ./api-server/package.json

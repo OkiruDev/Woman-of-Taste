@@ -2,6 +2,7 @@
 command = "pnpm install --ignore-scripts && pnpm run build"
 
 dockerfilePath = "./Dockerfile"
+watchPatterns = ["**"]
 
 [deploy]
 startCommand = "node api-server/dist/index.cjs"

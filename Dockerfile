@@ -7,7 +7,6 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY api-server/package.json ./api-server/package.json
 COPY woman-of-taste/package.json ./woman-of-taste/package.json
 COPY mockup-sandbox/package.json ./mockup-sandbox/package.json
-COPY scripts/package.json ./scripts/package.json
 COPY lib ./lib
 
 RUN pnpm install --ignore-scripts --frozen-lockfile

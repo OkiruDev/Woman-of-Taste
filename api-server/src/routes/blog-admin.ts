@@ -102,6 +102,7 @@ blogAdminRouter.patch("/admin/blog/:id", authMiddleware, async (req, res) => {
   for (const f of fields) {
     if (req.body[f] !== undefined) updates[f] = req.body[f];
   }
+  if (typeof updates.publishedAt === "string") updates.publishedAt = new Date(updates.publishedAt);
   if (req.body.status === "published" && !req.body.publishedAt) {
     const [current] = await db.select().from(blogPostsTable).where(eq(blogPostsTable.id, id)).limit(1);
     if (!current?.publishedAt) updates.publishedAt = new Date();

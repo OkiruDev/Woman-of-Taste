@@ -7,7 +7,8 @@
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./api-server\" --filter \"./woman-of-taste\" --if-present run typecheck",
-    "railway:start": "pnpm run build && node api-server/dist/index.cjs"
+    "railway:start": "pnpm run build && node api-server/dist/index.cjs",
+    "db:push": "drizzle-kit push"
   },
   "private": true,
   "engines": {
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@esbuild/win32-x64": "0.27.3",
     "@rollup/rollup-win32-x64-msvc": "4.62.2",
+    "drizzle-kit": "^0.31.10",
     "esbuild": "0.27.3",
     "lightningcss-win32-x64-msvc": "1.32.0",
     "prettier": "^3.8.1",

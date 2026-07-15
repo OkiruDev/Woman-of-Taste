@@ -7,3 +7,5 @@ export * from "./places.js";
 export * from "./finance.js";
 export * from "./refunds.js";
 export * from "./adminSettings.js";
+export * from "./eventProjects.js";
+export * from "./contentPipeline.js";

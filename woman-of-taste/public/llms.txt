@@ -1,0 +1,27 @@
+# Woman of Taste
+
+Woman of Taste is a South African women's lifestyle platform curating premium events, restaurant reviews, and curated experiences. It is built around the TikTok community of PashieB (@pashieb_the_wot) and serves women who approach dining, travel, and social life with taste and intention.
+
+## Canonical domain
+
+https://womanoftaste.co.za
+
+## Key public sections
+
+- /events — upcoming and past women's lifestyle events across South Africa
+- /events/johannesburg — Johannesburg events
+- /events/cape-town — Cape Town events
+- /events/pretoria — Pretoria events
+- /journal — editorial content: restaurant guides, lifestyle pieces, and cultural commentary
+- /restaurants — curated restaurant, stay, and experience destination pages
+- /experiences — themed experience categories (private dining, wine tasting, networking, lifestyle)
+- /about — brand story and mission
+- /partnerships — brand partnership information
+
+## Content focus
+
+The site publishes original editorial content about women's events in South Africa, curated restaurant and destination reviews (primarily Johannesburg), and lifestyle writing for women who value quality, aesthetics, and intentional living.
+
+## Sitemap
+
+https://womanoftaste.co.za/sitemap.xml

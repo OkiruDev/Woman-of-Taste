@@ -1,0 +1,9 @@
+[build]
+command = "pnpm install --ignore-scripts && pnpm run build"
+
+dockerfilePath = "./Dockerfile"
+
+[deploy]
+startCommand = "node api-server/dist/index.cjs"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300

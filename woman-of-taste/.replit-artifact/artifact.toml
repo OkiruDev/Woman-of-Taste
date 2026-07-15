@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Woman of Taste"
+version = "1.0.0"
+id = "artifacts/woman-of-taste"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 23084
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/woman-of-taste run dev"
+
+[services.env]
+PORT = "23084"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/woman-of-taste", "run", "build"]
+publicDir = "artifacts/woman-of-taste/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

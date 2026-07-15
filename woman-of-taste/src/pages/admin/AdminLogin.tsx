@@ -21,9 +21,9 @@ export function useAdminAuth() {
   const token = getAdminToken();
   const valid = isTokenValid(token);
   useEffect(() => {
-    if (!valid) { clearAdminToken(); navigate("/login"); }
+    if (!valid) { clearAdminToken(); navigate("/admin/login"); }
   }, [valid]);
-  return { token: valid ? token! : null, logout: () => { clearAdminToken(); navigate("/login"); } };
+  return { token: valid ? token! : null, logout: () => { clearAdminToken(); navigate("/admin/login"); } };
 }
 
 export async function adminFetch(path: string, options: RequestInit = {}) {

@@ -40,6 +40,7 @@ publicRouter.use(blogPublicRouter);
 // Routers reachable only from the admin portal (admin.womanoftaste.co.za) — every route in
 // these files is already gated by requireAdminAuth (see middlewares/adminAuth.ts).
 const adminApiRouter: IRouter = Router();
+adminApiRouter.use(healthRouter);
 adminApiRouter.use(adminRouter);
 adminApiRouter.use(adminProfilesRouter);
 adminApiRouter.use(statsRouter);
